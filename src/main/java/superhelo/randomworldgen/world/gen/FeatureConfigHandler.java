@@ -8,7 +8,6 @@ import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.WorldGenRegistries;
-import net.minecraft.world.biome.Biome.Category;
 import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraft.world.gen.blockplacer.SimpleBlockPlacer;
 import net.minecraft.world.gen.blockstateprovider.SimpleBlockStateProvider;
@@ -40,18 +39,28 @@ public class FeatureConfigHandler {
 		e.enqueueWork(() -> {
 			register("dark_wood_tree",
 					Feature.TREE.configured(new BaseTreeFeatureConfig.Builder(
-							new SimpleBlockStateProvider(defaultBlockState("druidcraft", "darkwood_log").setValue(RotatedPillarBlock.AXIS, Axis.Y)),
-							blockStateProvider(getBlock("druidcraft", "darkwood_leaves")),
+							new SimpleBlockStateProvider(
+									defaultBlockState("druidcraft", "darkwood_log").setValue(RotatedPillarBlock.AXIS, Axis.Y)),
+									blockStateProvider(getBlock("druidcraft", "darkwood_leaves")
+									),
 							new BlobFoliagePlacer(FeatureSpread.fixed(3), FeatureSpread.fixed(0), 4),
 							new StraightTrunkPlacer(7, 3, 0),
 							new TwoLayerFeature(1, 0, 1)).ignoreVines().build()).decorated(Placements.HEIGHTMAP_SQUARE),
-					(event) -> event.getCategory() == Category.FOREST
+					(event) -> event.getName() != null && event.getName().equals(new ResourceLocation("minecraft", "swamp"))
 			);
-			register("sapling",
+			register("simplytea_sapling",
 					Feature.RANDOM_PATCH.configured(new BlockClusterFeatureConfig.Builder(
-							blockStateProvider(Blocks.OAK_SAPLING), new SimpleBlockPlacer()
+							new SimpleBlockStateProvider(defaultBlockState("simplytea", "tea_sapling")),
+							new SimpleBlockPlacer()
 					).tries(10).build()).decorated(Placements.HEIGHTMAP_SQUARE),
-					(event) -> event.getCategory() == Category.FOREST
+					(event) -> event.getName() != null && event.getName().equals(new ResourceLocation("minecraft", "swamp"))
+			);
+			register("tea_kettle_bush",
+					Feature.RANDOM_PATCH.configured(new BlockClusterFeatureConfig.Builder(
+							new SimpleBlockStateProvider(defaultBlockState("tea_kettle", "tea_bush")),
+							new SimpleBlockPlacer()
+					).tries(10).build()).decorated(Placements.HEIGHTMAP_SQUARE),
+					(event) -> event.getName() != null && event.getName().equals(new ResourceLocation("minecraft", "swamp"))
 			);
 		});
 	}
@@ -86,4 +95,13 @@ public class FeatureConfigHandler {
 		return new SimpleBlockStateProvider(block.defaultBlockState());
 	}
 
+	private static boolean inBiomeList(ResourceLocation biomeToCheck, ArrayList<ResourceLocation> biomes) {
+		boolean checkResult = true;
+		for(ResourceLocation biome: biomes) {
+			checkResult = checkResult && biomeToCheck != null && biomeToCheck.equals(biome);
+		}
+		return checkResult;
+	}
+
+	// TODO: 填写待检查群系的List
 }

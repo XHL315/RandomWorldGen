@@ -81,8 +81,11 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.29'
-    //implementation fg.deobf('curse.maven:Tropicraft-254794:3606854')
-    implementation fg.deobf('curse.maven:Druidcraft-340991:3507029')
+    runtimeOnly fg.deobf('curse.maven:JEI-238222:3681294')
+    runtimeOnly fg.deobf('curse.maven:Druidcraft-340991:3507029')
+    runtimeOnly fg.deobf('curse.maven:SimplyTea-268373:3310150')
+    runtimeOnly fg.deobf('curse.maven:TeaKettle-445245:3434736')
+    runtimeOnly fg.deobf('curse.maven:NaturesCompass-252848:3382150')
 }
 
 jar {
