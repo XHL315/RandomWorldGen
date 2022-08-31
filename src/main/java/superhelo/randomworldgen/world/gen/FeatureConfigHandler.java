@@ -31,7 +31,25 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 
 public class FeatureConfigHandler {
-
+	// List of all biomes we generate trees
+	private static final ArrayList<ResourceLocation> TREE_BIOMES = new ArrayList<ResourceLocation>() {
+		{
+			add(new ResourceLocation("tropicraft", "rainforest_hills"));
+			add(new ResourceLocation("tropicraft", "rainforest_island_mountains"));
+			add(new ResourceLocation("tropicraft", "rainforest_mountains"));
+			add(new ResourceLocation("tropicraft", "rainforest_plains"));
+		}
+	};
+	// List of all biomes we generate tea saplings
+	private static final ArrayList<ResourceLocation> TEA_SAPLING_BIOMES = new ArrayList<ResourceLocation>() {
+		{
+			add(new ResourceLocation("tropicraft", "rainforest_hills"));
+			add(new ResourceLocation("tropicraft", "rainforest_island_mountains"));
+			add(new ResourceLocation("tropicraft", "rainforest_mountains"));
+			add(new ResourceLocation("tropicraft", "rainforest_plains"));
+			add(new ResourceLocation("tropicraft", "z_bamboo_rainforest"));
+		}
+	};
 	private static final List<ConfigureFeatureHelper> HELPERS = new ArrayList<>();
 
 	public static void setup(FMLCommonSetupEvent e) {
@@ -45,21 +63,32 @@ public class FeatureConfigHandler {
 							new BlobFoliagePlacer(FeatureSpread.fixed(3), FeatureSpread.fixed(0), 4),
 							new StraightTrunkPlacer(7, 3, 0),
 							new TwoLayerFeature(1, 0, 1)).ignoreVines().build()).decorated(Placements.HEIGHTMAP_SQUARE),
-					(event) -> event.getName() != null && event.getName().equals(new ResourceLocation("minecraft", "swamp"))
+					(event) -> inBiomeList(event.getName(), TREE_BIOMES)
+			);
+			register("elder_tree",
+					Feature.TREE.configured(new BaseTreeFeatureConfig.Builder(
+							new SimpleBlockStateProvider(
+									defaultBlockState("druidcraft", "elder_log").setValue(RotatedPillarBlock.AXIS, Axis.Y)),
+							blockStateProvider(getBlock("druidcraft", "elder_leaves")
+							),
+							new BlobFoliagePlacer(FeatureSpread.fixed(3), FeatureSpread.fixed(0), 4),
+							new StraightTrunkPlacer(7, 3, 0),
+							new TwoLayerFeature(1, 0, 1)).ignoreVines().build()).decorated(Placements.HEIGHTMAP_SQUARE),
+					(event) -> inBiomeList(event.getName(), TREE_BIOMES)
 			);
 			register("simplytea_sapling",
 					Feature.RANDOM_PATCH.configured(new BlockClusterFeatureConfig.Builder(
 							new SimpleBlockStateProvider(defaultBlockState("simplytea", "tea_sapling")),
 							new SimpleBlockPlacer()
-					).tries(10).build()).decorated(Placements.HEIGHTMAP_SQUARE),
-					(event) -> event.getName() != null && event.getName().equals(new ResourceLocation("minecraft", "swamp"))
+					).tries(8).build()).decorated(Placements.HEIGHTMAP_SQUARE),
+					(event) -> inBiomeList(event.getName(), TEA_SAPLING_BIOMES)
 			);
 			register("tea_kettle_bush",
 					Feature.RANDOM_PATCH.configured(new BlockClusterFeatureConfig.Builder(
 							new SimpleBlockStateProvider(defaultBlockState("tea_kettle", "tea_bush")),
 							new SimpleBlockPlacer()
-					).tries(10).build()).decorated(Placements.HEIGHTMAP_SQUARE),
-					(event) -> event.getName() != null && event.getName().equals(new ResourceLocation("minecraft", "swamp"))
+					).tries(8).build()).decorated(Placements.HEIGHTMAP_SQUARE),
+					(event) -> inBiomeList(event.getName(), TEA_SAPLING_BIOMES)
 			);
 		});
 	}
@@ -95,12 +124,9 @@ public class FeatureConfigHandler {
 	}
 
 	private static boolean inBiomeList(ResourceLocation biomeToCheck, ArrayList<ResourceLocation> biomes) {
-		boolean checkResult = true;
 		for(ResourceLocation biome: biomes) {
-			checkResult = checkResult && biomeToCheck != null && biomeToCheck.equals(biome);
+			if (biomeToCheck != null && biomeToCheck.equals(biome)) return true;
 		}
-		return checkResult;
+		return false;
 	}
-
-	// TODO: 填写待检查群系的List
 }
