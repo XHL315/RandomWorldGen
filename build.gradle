@@ -77,11 +77,20 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven {
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.29'
-    runtimeOnly fg.deobf('curse.maven:JEI-238222:3681294')
+
+    runtimeOnly fg.deobf("mezz.jei:jei-1.16.5:7.7.1.152")
     runtimeOnly fg.deobf('curse.maven:Druidcraft-340991:3507029')
     runtimeOnly fg.deobf('curse.maven:SimplyTea-268373:3310150')
     runtimeOnly fg.deobf('curse.maven:TeaKettle-445245:3434736')
