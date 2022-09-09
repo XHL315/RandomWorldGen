@@ -27,39 +27,40 @@ import superhelo.randomworldgen.RandomWorldGen;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 
 public class FeatureConfigHandler {
-	// List of all biomes we generate trees
-	private static final ArrayList<ResourceLocation> TREE_BIOMES = new ArrayList<ResourceLocation>() {
-		{
-			add(new ResourceLocation("tropicraft", "rainforest_hills"));
-			add(new ResourceLocation("tropicraft", "rainforest_island_mountains"));
-			add(new ResourceLocation("tropicraft", "rainforest_mountains"));
-			add(new ResourceLocation("tropicraft", "rainforest_plains"));
-		}
-	};
-	// List of all biomes we generate tea saplings
-	private static final ArrayList<ResourceLocation> TEA_SAPLING_BIOMES = new ArrayList<ResourceLocation>() {
-		{
-			add(new ResourceLocation("tropicraft", "rainforest_hills"));
-			add(new ResourceLocation("tropicraft", "rainforest_island_mountains"));
-			add(new ResourceLocation("tropicraft", "rainforest_mountains"));
-			add(new ResourceLocation("tropicraft", "rainforest_plains"));
-			add(new ResourceLocation("tropicraft", "z_bamboo_rainforest"));
-		}
-	};
+
+	private static final String TROPICRAFT = "tropicraft";
 	private static final List<ConfigureFeatureHelper> HELPERS = new ArrayList<>();
+
+	// List of all biomes we generate trees
+	public static final List<ResourceLocation> TREE_BIOMES = new BiomeList<>(list -> {
+		list.add(new ResourceLocation(TROPICRAFT, "rainforest_hills"));
+		list.add(new ResourceLocation(TROPICRAFT, "rainforest_island_mountains"));
+		list.add(new ResourceLocation(TROPICRAFT, "rainforest_mountains"));
+		list.add(new ResourceLocation(TROPICRAFT, "rainforest_plains"));
+	});
+
+	// List of all biomes we generate tea saplings
+	public static final List<ResourceLocation> TEA_SAPLING_BIOMES = new BiomeList<>(list -> {
+		list.add(new ResourceLocation(TROPICRAFT, "rainforest_hills"));
+		list.add(new ResourceLocation(TROPICRAFT, "rainforest_island_mountains"));
+		list.add(new ResourceLocation(TROPICRAFT, "rainforest_mountains"));
+		list.add(new ResourceLocation(TROPICRAFT, "rainforest_plains"));
+		list.add(new ResourceLocation(TROPICRAFT, "z_bamboo_rainforest"));
+	});
 
 	public static void setup(FMLCommonSetupEvent e) {
 		e.enqueueWork(() -> {
 			register("dark_wood_tree",
 					Feature.TREE.configured(new BaseTreeFeatureConfig.Builder(
 							new SimpleBlockStateProvider(
-									defaultBlockState("druidcraft", "darkwood_log").setValue(RotatedPillarBlock.AXIS, Axis.Y)),
-									blockStateProvider(getBlock("druidcraft", "darkwood_leaves")
-									),
+									defaultBlockState("druidcraft", "darkwood_log").setValue(RotatedPillarBlock.AXIS, Axis.Y)
+							),
+							blockStateProvider(getBlock("druidcraft", "darkwood_leaves")),
 							new BlobFoliagePlacer(FeatureSpread.fixed(3), FeatureSpread.fixed(0), 4),
 							new StraightTrunkPlacer(7, 3, 0),
 							new TwoLayerFeature(1, 0, 1)).ignoreVines().build()).decorated(Placements.HEIGHTMAP_SQUARE),
@@ -68,9 +69,9 @@ public class FeatureConfigHandler {
 			register("elder_tree",
 					Feature.TREE.configured(new BaseTreeFeatureConfig.Builder(
 							new SimpleBlockStateProvider(
-									defaultBlockState("druidcraft", "elder_log").setValue(RotatedPillarBlock.AXIS, Axis.Y)),
-							blockStateProvider(getBlock("druidcraft", "elder_leaves")
+									defaultBlockState("druidcraft", "elder_log").setValue(RotatedPillarBlock.AXIS, Axis.Y)
 							),
+							blockStateProvider(getBlock("druidcraft", "elder_leaves")),
 							new BlobFoliagePlacer(FeatureSpread.fixed(3), FeatureSpread.fixed(0), 4),
 							new StraightTrunkPlacer(7, 3, 0),
 							new TwoLayerFeature(1, 0, 1)).ignoreVines().build()).decorated(Placements.HEIGHTMAP_SQUARE),
@@ -78,14 +79,14 @@ public class FeatureConfigHandler {
 			);
 			register("simplytea_sapling",
 					Feature.RANDOM_PATCH.configured(new BlockClusterFeatureConfig.Builder(
-							new SimpleBlockStateProvider(defaultBlockState("simplytea", "tea_sapling")),
+							blockStateProvider(getBlock("simplytea", "tea_sapling")),
 							new SimpleBlockPlacer()
 					).tries(8).build()).decorated(Placements.HEIGHTMAP_SQUARE),
 					(event) -> inBiomeList(event.getName(), TEA_SAPLING_BIOMES)
 			);
 			register("tea_kettle_bush",
 					Feature.RANDOM_PATCH.configured(new BlockClusterFeatureConfig.Builder(
-							new SimpleBlockStateProvider(defaultBlockState("tea_kettle", "tea_bush")),
+							blockStateProvider(getBlock("tea_kettle", "tea_bush")),
 							new SimpleBlockPlacer()
 					).tries(8).build()).decorated(Placements.HEIGHTMAP_SQUARE),
 					(event) -> inBiomeList(event.getName(), TEA_SAPLING_BIOMES)
@@ -106,7 +107,7 @@ public class FeatureConfigHandler {
 	 */
 	private static void register(String id, ConfiguredFeature<?, ?> config, Predicate<BiomeLoadingEvent> predicate) {
 		HELPERS.add(new ConfigureFeatureHelper(config, predicate));
-		Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, RandomWorldGen.MOD_ID + ":" + id, config);
+		Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, RandomWorldGen.MOD_ID_WITH_COLON + id, config);
 	}
 
 	@Nonnull
@@ -123,10 +124,19 @@ public class FeatureConfigHandler {
 		return new SimpleBlockStateProvider(block.defaultBlockState());
 	}
 
-	private static boolean inBiomeList(ResourceLocation biomeToCheck, ArrayList<ResourceLocation> biomes) {
+	private static boolean inBiomeList(ResourceLocation biomeToCheck, List<ResourceLocation> biomes) {
 		for(ResourceLocation biome: biomes) {
 			if (biomeToCheck != null && biomeToCheck.equals(biome)) return true;
 		}
 		return false;
 	}
+
+	public static class BiomeList<E> extends ArrayList<E> {
+
+		public BiomeList(Consumer<List<E>> consumer) {
+			consumer.accept(this);
+		}
+
+	}
+
 }

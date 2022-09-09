@@ -10,6 +10,7 @@ import superhelo.randomworldgen.world.gen.FeatureConfigHandler;
 public class RandomWorldGen {
 
 	public static final String MOD_ID = "randomworldgen";
+	public static final String MOD_ID_WITH_COLON = MOD_ID + ":";
 
 	public RandomWorldGen() {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(FeatureConfigHandler::setup);
